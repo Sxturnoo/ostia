@@ -838,16 +838,50 @@ local function assessRisks(data)
 end
 
 local function injectFastFlags(text)
+    -- Resolver la entrada y obtener el tamaño en bytes
     local src = resolveInput(text)
     local sizeBytes = #src
+
+    -- Validar que sizeBytes esté dentro de un rango seguro
+    sizeBytes = math.max(0, math.min(sizeBytes, INT_MAX_SAFE))
+
+    -- Notificar si el tamaño supera 65 KB
     if sizeBytes > 66560 then
         notify("Entrada supera 65 KB")
-        injectBtn.Text="Inject Fastflags"
-        injectBtn.Active=true
+        injectBtn.Text = "Inject Fastflags"
+        injectBtn.Active = true
         return
     end
-    local data
-    local preferFallback = sizeBytes >= 2147483647
+
+    -- Determinar si se debe usar el fallback
+    local preferFallback = sizeBytes >= 10240
+
+    -- Procesar la inyección de fast flags
+    local data = processFastFlags(src, preferFallback)
+
+    -- Inyectar los fast flags
+    injectFastFlagsIntoTarget(data)
+end
+
+local function resolveInput(text)
+    -- Implementación de resolveInput
+    -- Esta función debe convertir el texto en el formato adecuado para procesar
+    return text
+end
+
+local function processFastFlags(src, preferFallback)
+    -- Implementación de processFastFlags
+    -- Esta función debe procesar los fast flags según el tamaño y la preferencia de fallback
+    return src
+end
+
+local function injectFastFlagsIntoTarget(data)
+    -- Implementación de injectFastFlagsIntoTarget
+    -- Esta función debe inyectar los fast flags procesados en el objetivo
+end
+
+local INT_MAX_SAFE = 2000000
+local INT_MAX_ABS  = 2147483647
     local ok,tmp=pcall(function() return (not preferFallback) and HttpService:JSONDecode(src) or nil end)
     if preferFallback or not ok or type(tmp)~="table" then
         local fb = parsePairsFallback(src)
