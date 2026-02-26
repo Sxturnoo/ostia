@@ -33,7 +33,7 @@ if existingGui then existingGui:Destroy() end
 local accent = Color3.fromRGB(0,255,180)
 local accent2 = Color3.fromRGB(80,200,255)
 local baseBg = Color3.fromRGB(10,10,16)
-local fps = 60
+local fps = 9000
 local frameMs = 16
 local cpuMs = 16
 local animaciones_gordodemierda = true
@@ -138,7 +138,7 @@ end
 
 local gui = new("ScreenGui", {
     Parent = playerGui,
-    Name = "KyroDev",
+    Name = "KenyahSence",
     IgnoreGuiInset = true,
     ResetOnSpawn = false
 })
@@ -181,7 +181,7 @@ local pattern = new("ImageLabel",{Parent=container,Size=UDim2.fromScale(1,1),Bac
 
 local header = new("Frame",{Parent=container,Size=UDim2.new(1,0,0,40),BackgroundColor3=Color3.fromRGB(14,14,24)})
 round(header,16)
-local title = new("TextLabel",{Parent=header,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Text="KyroDev",Font=Enum.Font.GothamBold,TextSize=15,TextColor3=accent2})
+local title = new("TextLabel",{Parent=header,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Text="$ - Kenyah Sence - $",Font=Enum.Font.GothamBold,TextSize=15,TextColor3=accent2})
 local closeBtn = new("TextButton",{Parent=header,Size=UDim2.fromOffset(22,22),Position=UDim2.new(1,-28,0,7),BackgroundColor3=Color3.fromRGB(18,18,30),Text="✕",Font=Enum.Font.GothamBold,TextSize=12,TextColor3=accent2})
 round(closeBtn,6)
 local minimizeBtn = new("TextButton",{Parent=header,Size=UDim2.fromOffset(22,22),Position=UDim2.new(1,-56,0,9),BackgroundColor3=Color3.fromRGB(18,18,30),Text="—",Font=Enum.Font.GothamBold,TextSize=12,TextColor3=accent2})
@@ -438,7 +438,10 @@ local categoryPatterns = {
 }
 local ignoreCategories = {network=false, physics=false, telemetry=false, rendering=false, audio=false}
 
-local function computeRate(bytes,count)
+local function computeRate(bytes, count)
+    bytes = math.max(0, math.min(bytes, INT_MAX_SAFE))
+    count = math.max(0, math.min(count, INT_MAX_SAFE))
+
     if FAST_MODE then
         if bytes >= 30000 or count >= 1200 then return 3 end
         if bytes >= 20000 or count >= 700 then return 5 end
@@ -905,15 +908,15 @@ local function injectFastFlags(text)
             local lowFpsStreak = 0
             local MAX_FRAME_TIME
             if sizeBytes >= 65000 then
-                MAX_FRAME_TIME = 0.003
+                MAX_FRAME_TIME = 0.006
             else
-                MAX_FRAME_TIME = 0.004
+                MAX_FRAME_TIME = 0.008
             end
             if FAST_MODE then
                 if sizeBytes >= 65000 then
-                    MAX_FRAME_TIME = 0.006
+                    MAX_FRAME_TIME = 0.003
                 else
-                    MAX_FRAME_TIME = 0.008
+                    MAX_FRAME_TIME = 0.004
                 end
             end
             
@@ -1065,7 +1068,7 @@ local function sanitizeAndSave(text)
         count+=1
     end
     local encoded = HttpService:JSONEncode(out)
-    local name = "KyroDevNeo-SAFE.json"
+    local name = "KenyahSenceSAFE.json"
     local t = text:match("^%s*(.-)%s*$")
     if t:lower():sub(-5)==".json" then
         name = t:gsub("%.json$","-SAFE.json")
