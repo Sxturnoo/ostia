@@ -33,7 +33,7 @@ if existingGui then existingGui:Destroy() end
 local accent = Color3.fromRGB(0,255,180)
 local accent2 = Color3.fromRGB(80,200,255)
 local baseBg = Color3.fromRGB(10,10,16)
-local fps = 9000
+local fps = 60
 local frameMs = 16
 local cpuMs = 16
 local animaciones_gordodemierda = true
@@ -138,7 +138,7 @@ end
 
 local gui = new("ScreenGui", {
     Parent = playerGui,
-    Name = "KenyahSence",
+    Name = "KyroDev",
     IgnoreGuiInset = true,
     ResetOnSpawn = false
 })
@@ -181,7 +181,7 @@ local pattern = new("ImageLabel",{Parent=container,Size=UDim2.fromScale(1,1),Bac
 
 local header = new("Frame",{Parent=container,Size=UDim2.new(1,0,0,40),BackgroundColor3=Color3.fromRGB(14,14,24)})
 round(header,16)
-local title = new("TextLabel",{Parent=header,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Text="$ - Kenyah Sence - $",Font=Enum.Font.GothamBold,TextSize=15,TextColor3=accent2})
+local title = new("TextLabel",{Parent=header,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Text="KyroDev",Font=Enum.Font.GothamBold,TextSize=15,TextColor3=accent2})
 local closeBtn = new("TextButton",{Parent=header,Size=UDim2.fromOffset(22,22),Position=UDim2.new(1,-28,0,7),BackgroundColor3=Color3.fromRGB(18,18,30),Text="✕",Font=Enum.Font.GothamBold,TextSize=12,TextColor3=accent2})
 round(closeBtn,6)
 local minimizeBtn = new("TextButton",{Parent=header,Size=UDim2.fromOffset(22,22),Position=UDim2.new(1,-56,0,9),BackgroundColor3=Color3.fromRGB(18,18,30),Text="—",Font=Enum.Font.GothamBold,TextSize=12,TextColor3=accent2})
@@ -339,7 +339,7 @@ cancelBtn.MouseButton1Click:Connect(function()
     injectionState.cancel = true
 end)
 
-new("TextLabel",{Parent=pageCredits,Position=UDim2.new(0,16,0,18),Size=UDim2.new(1,-32,0,120),BackgroundTransparency=1,Text="KenyahSenceNeo\n\nOwner: @0_kenyah\nLead Devs: @0_kenyah",Font=Enum.Font.GothamBold,TextSize=16,TextColor3=accent2})
+new("TextLabel",{Parent=pageCredits,Position=UDim2.new(0,16,0,18),Size=UDim2.new(1,-32,0,120),BackgroundTransparency=1,Text="KyroDevNeo\n\nOwner: @kyro\nLead Devs: @kyro & @Gonzza",Font=Enum.Font.GothamBold,TextSize=16,TextColor3=accent2})
 
 local function openUI()
     container.Visible=true
@@ -391,8 +391,7 @@ local function closeUI()
     end
     dockIcon.Visible=true
 end
-closeBtn.MouseButton1Click:Connect(closeUI)>
-
+closeBtn.MouseButton1Click:Connect(closeUI)
 minimizeBtn.MouseButton1Click:Connect(closeUI)
 container.Active = true
 container.Selectable = true 
@@ -439,22 +438,15 @@ local categoryPatterns = {
 }
 local ignoreCategories = {network=false, physics=false, telemetry=false, rendering=false, audio=false}
 
-local function setMaxFrameTime(sizeBytes)
-    
-    sizeBytes = math.max(0, math.min(sizeBytes, INT_MAX_SAFE))
-
+local function computeRate(bytes,count)
     if FAST_MODE then
-        if sizeBytes >= 65000 then
-            MAX_FRAME_TIME = 0.006
-        else
-            MAX_FRAME_TIME = 0.008
-        end
+        if bytes >= 30000 or count >= 1200 then return 3 end
+        if bytes >= 20000 or count >= 700 then return 5 end
+        return 8
     else
-        if sizeBytes >= 65000 then
-            MAX_FRAME_TIME = 0.003
-        else
-            MAX_FRAME_TIME = 0.004
-        end
+        if bytes >= 30000 or count >= 1200 then return 1 end
+        if bytes >= 20000 or count >= 700 then return 2 end
+        return 3
     end
 end
 
@@ -838,50 +830,16 @@ local function assessRisks(data)
 end
 
 local function injectFastFlags(text)
-    -- Resolver la entrada y obtener el tamaño en bytes
     local src = resolveInput(text)
     local sizeBytes = #src
-
-    -- Validar que sizeBytes esté dentro de un rango seguro
-    sizeBytes = math.max(0, math.min(sizeBytes, INT_MAX_SAFE))
-
-    -- Notificar si el tamaño supera 65 KB
     if sizeBytes > 66560 then
         notify("Entrada supera 65 KB")
-        injectBtn.Text = "Inject Fastflags"
-        injectBtn.Active = true
+        injectBtn.Text="Inject Fastflags"
+        injectBtn.Active=true
         return
     end
-
-    -- Determinar si se debe usar el fallback
+    local data
     local preferFallback = sizeBytes >= 10240
-
-    -- Procesar la inyección de fast flags
-    local data = processFastFlags(src, preferFallback)
-
-    -- Inyectar los fast flags
-    injectFastFlagsIntoTarget(data)
-end
-
-local function resolveInput(text)
-    -- Implementación de resolveInput
-    -- Esta función debe convertir el texto en el formato adecuado para procesar
-    return text
-end
-
-local function processFastFlags(src, preferFallback)
-    -- Implementación de processFastFlags
-    -- Esta función debe procesar los fast flags según el tamaño y la preferencia de fallback
-    return src
-end
-
-local function injectFastFlagsIntoTarget(data)
-    -- Implementación de injectFastFlagsIntoTarget
-    -- Esta función debe inyectar los fast flags procesados en el objetivo
-end
-
-local INT_MAX_SAFE = 2000000
-local INT_MAX_ABS  = 2147483647
     local ok,tmp=pcall(function() return (not preferFallback) and HttpService:JSONDecode(src) or nil end)
     if preferFallback or not ok or type(tmp)~="table" then
         local fb = parsePairsFallback(src)
@@ -947,15 +905,15 @@ local INT_MAX_ABS  = 2147483647
             local lowFpsStreak = 0
             local MAX_FRAME_TIME
             if sizeBytes >= 65000 then
-                MAX_FRAME_TIME = 0.006
+                MAX_FRAME_TIME = 0.003
             else
-                MAX_FRAME_TIME = 0.008
+                MAX_FRAME_TIME = 0.004
             end
             if FAST_MODE then
                 if sizeBytes >= 65000 then
-                    MAX_FRAME_TIME = 0.003
+                    MAX_FRAME_TIME = 0.006
                 else
-                    MAX_FRAME_TIME = 0.004
+                    MAX_FRAME_TIME = 0.008
                 end
             end
             
@@ -1107,7 +1065,7 @@ local function sanitizeAndSave(text)
         count+=1
     end
     local encoded = HttpService:JSONEncode(out)
-    local name = "KenyahSenceSAFE.json"
+    local name = "KyroDevNeo-SAFE.json"
     local t = text:match("^%s*(.-)%s*$")
     if t:lower():sub(-5)==".json" then
         name = t:gsub("%.json$","-SAFE.json")
