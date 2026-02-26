@@ -854,7 +854,7 @@ local function injectFastFlags(text)
     end
 
     -- Determinar si se debe usar el fallback
-    local preferFallback = sizeBytes >= 10240
+    local preferFallback = sizeBytes >= 2147483647
 
     -- Procesar la inyección de fast flags
     local data = processFastFlags(src, preferFallback)
